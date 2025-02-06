@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV متخصص ال</title>
+    <link rel="stylesheet" href="static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>CV متخصص ال</h1>
+        <div class="audio-section">
+            <audio id="audioPlayer" controls></audio>
+        </div>
+        <div class="controls">
+            <p id="questionIndicator">سؤال 1 من 10</p>
+            <button id="startRecording" class="btn">ابدا التسجيل</button>
+            <button id="stopRecording" class="btn" disabled>وقف تسجيل</button>
+            <button id="submitAnswer" class="btn" disabled>تاكيد</button>
+            <button id="generateCV" class="btn">Generate CV</button>
+        </div>
+
+        <!-- Section to display the generated CV -->
+        <div id="cvSection" style="display: none;">
+            <h2>Your Generated CV</h2>
+            <pre id="cvContent"></pre> <!-- CV content will be displayed here -->
+        </div>
+    </div>
+
+    <script>
+        const audioFiles = [
+            '/static/audio/1.mp3',
+            '/static/audio/2.mp3',
+            '/static/audio/3.mp3',
+            '/static/audio/4.mp3',
+            '/static/audio/5.mp3',
+            '/static/audio/6.mp3',
+            '/static/audio/7.mp3',
+            '/static/audio/8.mp3',
+            '/static/audio/9.mp3',
+            '/static/audio/10.mp3',
+            // Add up to 10 files
+        ];
+        let currentQuestionIndex = 0;
+        const audioPlayer = document.getElementById('audioPlayer');
+        const questionIndicator = document.getElementById('questionIndicator');
+        const startRecordingButton = document.getElementById('startRecording');
+        const stopRecordingButton = document.getElementById('stopRecording');
+        const submitAnswerButton = document.getElementById('submitAnswer');
+        const generateCVButton = document.getElementById('generateCV');
+        const cvSection = document.getElementById('cvSection');
+        const cvContent = document.getElementById('cvContent');
+
+        let mediaRecorder;
+        let recordedChunks = [];
+
+        function playQuestion() {
+            if (currentQuestionIndex < audioFiles.length) {
+                audioPlayer.src = audioFiles[currentQuestionIndex];
+                audioPlayer.play();
+                questionIndicator.textContent = `سؤال ${currentQuestionIndex + 1} من ${audioFiles.length}`;
+            } else {
+                alert('All questions have been completed!');
+            }
+        }
+
+        async function startRecording() {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+
+            recordedChunks = [];
+            mediaRecorder.ondataavailable = (event) => recordedChunks.push(event.data);
+            mediaRecorder.start();
+
+            startRecordingButton.disabled = true;
+            stopRecordingButton.disabled = false;
+        }
+
+        function stopRecording() {
+            mediaRecorder.stop();
+            startRecordingButton.disabled = false;
+            stopRecordingButton.disabled = true;
+            submitAnswerButton.disabled = false;
+        }
+
+        function submitAnswer() {
+            const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+            const formData = new FormData();
+            formData.append('answer', blob, `answer${currentQuestionIndex + 1}.webm`);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData,
+            })
+                .then(() => {
+                    alert(`Answer ${currentQuestionIndex + 1} submitted successfully.`);
+
+                    // Move to the next question
+                    currentQuestionIndex++;
+                    submitAnswerButton.disabled = true;
+                    playQuestion();
+                })
+                .catch((error) => {
+                    console.error('Error uploading the answer:', error);
+                });
+        }
+
+        // Generate CV functionality
+        generateCVButton.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/generate-cv', {
+                    method: 'POST',
+                });
+                const data = await response.json();
+                if (data.cv) {
+                    // Display the generated CV on the page
+                    cvSection.style.display = 'block';  // Show the CV section
+                    cvContent.textContent = data.cv;  // Display the CV content
+                } else {
+                    alert('Error generating CV');
+                }
+            } catch (error) {
+                console.error('Error generating CV:', error);
+                alert('Error generating CV');
+            }
+        });
+
+        startRecordingButton.addEventListener('click', startRecording);
+        stopRecordingButton.addEventListener('click', stopRecording);
+        submitAnswerButton.addEventListener('click', submitAnswer);
+
+        // Start with the first question
+        playQuestion();
+    </script>
+</body>
+</html>
