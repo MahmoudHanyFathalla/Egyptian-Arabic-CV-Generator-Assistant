@@ -2,7 +2,7 @@
 
 **CV Voice** is an innovative project designed to help users create professional CVs in Arabic, tailored specifically for Egyptian users. The project leverages voice input to collect user responses, transcribes the audio into text, and generates a well-structured, professional CV using OpenAI's GPT-4 model. The system is built with Flask for the backend, HTML/CSS for the frontend, and integrates OpenAI's Whisper for audio transcription and GPT-4 for CV generation.
 
-![Web View](1.PNG)
+![Web View](static/1.PNG)
 
 ## Features
 
