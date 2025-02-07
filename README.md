@@ -132,4 +132,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ---
 
-**CV Voice** is designed to make the process of creating professional CVs simple, efficient, and accessible to everyone. Whether you're a job seeker or a recruiter, this tool will help you create high-quality CVs with ease.
+**CV Voice** is designed to make the process of creating professional CVs simple, efficient, and accessible to everyone. Whether you're a job seeker or a recruiter, this tool will help you create high-quality CVs with ease
